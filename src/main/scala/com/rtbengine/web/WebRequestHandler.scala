@@ -10,15 +10,26 @@ import akka.util.Timeout
 
 import com.rtbengine._
 
+import core.BiddingHandler
 import core.BiddingHandler._
 
 class WebRequestHandler extends Actor with ActorLogging {
 
-  implicit val timeout   = Timeout(20 seconds)
+  implicit val timeout       = Timeout(20 seconds)
+  private val biddingHandler = context.actorOf(Props[BiddingHandler])
 
   override def receive = {
     case req: BidRequest =>
       log.info("processing " + req)
+      val currentSender = sender
+
+      val biddingFut = (biddingHandler ? req).mapTo[BidResponse]
+
+      biddingFut onComplete {
+        case Success(response) =>
+        case Failure(error)    =>
+          log.error(s"Error from biddingHandler while processing [$req]" + Some(error))
+      }
   }
 
 }

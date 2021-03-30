@@ -20,7 +20,7 @@ object BiddingHandler {
     h: Option[Int],
     bidFloor: Option[Double]
   )
-  case class Site(id: Int, domain: String)
+  case class Site(id: String, domain: String)
   case class User(id: String, geo: Option[Geo])
   case class Device(id: String, geo: Option[Geo])
   case class Geo(country: Option[String])
@@ -38,15 +38,27 @@ object BiddingHandler {
     width: Int,
     height: Int
   )
+  case class Campaign(
+    id: Int,
+    country: String,
+    targeting: Targeting,
+    banners: List[Banner],
+    bid: Double
+  )
+
+  type siteId = String
+  case class Targeting(targetedSiteIds: Seq[siteId])
 }
 
-class BiddingHandler extends Actor with ActorLogging {
+class BiddingHandler extends Actor with ActorLogging with CampaignCacheT {
 
   import BiddingHandler._
 
   override def receive = {
     case req: BidRequest =>
       log.info("processing " + req)
+
+
   }
 
 }

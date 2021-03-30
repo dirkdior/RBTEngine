@@ -1,19 +1,35 @@
 package com.rtbengine.core
 
 import java.util.UUID._
+import java.security.MessageDigest
 
 import BiddingHandler._
 
-trait CampaignCacheT {
+private [core] trait CampaignCacheT {
 
-  val siteIdOne   = randomUUID.toString
-  val siteIdTwo   = randomUUID.toString
-  val siteIdThree = randomUUID.toString
+  val siteIdOne   = md5Hash(randomUUID.toString)
+  val siteIdTwo   = md5Hash(randomUUID.toString)
+  val siteIdThree = md5Hash(randomUUID.toString)
 
-  var siteIds: Map[siteId, List[Campaign]] = Map.empty[siteId, List[Campaign]]
-  val campaignCache: Seq[Campaign]         = getCampaigns
+  var siteIdMap: Map[siteId, List[Campaign]] = Map.empty[siteId, List[Campaign]]
+  val campaignCache: Seq[Campaign]           = getCampaigns
 
-  def getCampaigns: Seq[Campaign] = List(
+  for(campaign <- campaignCache) {
+    for(siteId <- campaign.targeting.targetedSiteIds) {
+      siteIdMap.get(siteId) match {
+        case Some(campaignsForSiteId) =>
+          siteIdMap += (siteId -> (campaign :: campaignsForSiteId))
+        case None                     =>
+          siteIdMap += (siteId -> List(campaign))
+      }
+    }
+  }
+
+  siteIdMap.foreach(println)
+
+  def md5Hash(value: String): String = MessageDigest.getInstance("MD5").digest(value.getBytes).map("%02x".format(_)).mkString
+
+  private def getCampaigns: Seq[Campaign] = List(
     Campaign(
       id        = 101,
       country   = "LT",
@@ -47,19 +63,4 @@ trait CampaignCacheT {
       bid       = 5d
     )
   )
-
-
-  for(campaign <- campaignCache) {
-    for(siteId <- campaign.targeting.targetedSiteIds) {
-      siteIds.get(siteId) match {
-        case Some(campaignsForSiteId) =>
-          siteIds += (siteId -> (campaign :: campaignsForSiteId))
-        case None                     =>
-          siteIds += (siteId -> List(campaign))
-      }
-    }
-  }
-
-  siteIds.foreach(println)
-
 }

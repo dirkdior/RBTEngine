@@ -21,12 +21,13 @@ class WebRequestHandler extends Actor with ActorLogging {
   override def receive = {
     case req: BidRequest =>
       log.info("processing " + req)
-      val currentSender = sender
+      val currentSender     = sender
 
-      val biddingFut = (biddingHandler ? req).mapTo[BidResponse]
+      val biddingHandlerFut = (biddingHandler ? req).mapTo[BidResponse]
 
-      biddingFut onComplete {
+      biddingHandlerFut onComplete {
         case Success(response) =>
+          currentSender ! response
         case Failure(error)    =>
           log.error(s"Error from biddingHandler while processing [$req]" + Some(error))
       }

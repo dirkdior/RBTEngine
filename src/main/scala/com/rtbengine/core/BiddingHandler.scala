@@ -57,8 +57,20 @@ class BiddingHandler extends Actor with ActorLogging with CampaignCacheT {
   override def receive = {
     case req: BidRequest =>
       log.info("processing " + req)
+      val currentSender = sender
 
+      siteIdMap.get(req.site.id) match {
+        case Some(id) =>
+          sender ! BidResponse(
+            id           = "randomId123",
+            bidRequestId = req.id,
+            price        = id.head.bid,
+            adid         = Some(id.head.id.toString),
+            banner       = None
+          )
+        case None     =>
 
+      }
   }
 
 }

@@ -29,8 +29,8 @@ class WebRequestHandler extends Actor with ActorLogging {
       biddingHandlerFut onComplete {
         case Success(response) =>
           currentSender ! response
-        case Failure(_)        =>
-          currentSender ! None
+        case Failure(error)        =>
+          currentSender ! error
       }
   }
 

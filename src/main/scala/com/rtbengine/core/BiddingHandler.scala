@@ -92,8 +92,8 @@ class BiddingHandler extends Actor with ActorLogging with CampaignCacheT {
                       currentSender ! None
                   }
                 case Failure(error)    =>
-                  log.error(s"An error occurred while processing request: [$req]" + Some(error))
-                  currentSender ! None
+                  log.error(s"An error occurred while processing request: [$req]\n\t\t" + error)
+                  currentSender ! error
               }
             case None          =>
               val userGeoFut = for {
@@ -120,8 +120,8 @@ class BiddingHandler extends Actor with ActorLogging with CampaignCacheT {
                           currentSender ! None
                       }
                     case Failure(error)    =>
-                      log.error(s"An error occurred while processing request: [$req]" + Some(error))
-                      currentSender ! None
+                      log.error(s"An error occurred while processing request: [$req]\n\t\t" + error)
+                      currentSender ! error
                   }
                 case None          =>
                   log.error(s"No Campaigns were found for request, the request does not include a device.geo or user.geo country: [$req]")
@@ -130,7 +130,7 @@ class BiddingHandler extends Actor with ActorLogging with CampaignCacheT {
           }
 
         case None     =>
-          log.error(s"No Campaigns were found for siteId: [$reqSiteId]" + req)
+          log.error(s"No Campaigns were found for siteId: [$reqSiteId], " + req)
           currentSender ! None
       }
   }

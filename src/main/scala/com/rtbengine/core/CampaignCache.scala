@@ -12,24 +12,23 @@ private [core] trait CampaignCacheT {
   val siteIdThree = md5Hash(randomUUID.toString)
 
   var siteIdMap: Map[siteId, List[Campaign]] = Map.empty[siteId, List[Campaign]]
-  val campaignCache: Seq[Campaign]           = getCampaigns
+  val campaignCache: Seq[Campaign]           = setCampaigns
 
-  for(campaign <- campaignCache) {
-    for(siteId <- campaign.targeting.targetedSiteIds) {
-      siteIdMap.get(siteId) match {
-        case Some(campaignsForSiteId) =>
-          siteIdMap += (siteId -> (campaign :: campaignsForSiteId))
-        case None                     =>
-          siteIdMap += (siteId -> List(campaign))
-      }
+  for {
+    campaign <- campaignCache
+    siteId   <- campaign.targeting.targetedSiteIds
+  } yield siteIdMap.get(siteId) match {
+      case Some(campaignsForSiteId) =>
+        siteIdMap += (siteId -> (campaign :: campaignsForSiteId))
+      case None                     =>
+        siteIdMap += (siteId -> List(campaign))
     }
-  }
 
   siteIdMap.foreach(println)
 
   def md5Hash(value: String): String = MessageDigest.getInstance("MD5").digest(value.getBytes).map("%02x".format(_)).mkString
 
-  private def getCampaigns: Seq[Campaign] = List(
+  def setCampaigns: Seq[Campaign] = List(
     Campaign(
       id        = 101,
       country   = "LT",

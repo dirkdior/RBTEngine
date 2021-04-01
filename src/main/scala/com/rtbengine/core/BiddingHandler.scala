@@ -1,7 +1,6 @@
 package com.rtbengine.core
 
-import scala.concurrent.{ Await, Future }
-import scala.concurrent.duration._
+import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{ Failure, Success }
 import scala.util.Random
@@ -60,11 +59,14 @@ class BiddingHandler extends Actor with ActorLogging with CampaignCacheT {
 
   import BiddingHandler._
 
+  def setBidResponseId: String = "someRandomId"
+
   override def receive = {
     case req: BidRequest =>
       log.info("processing " + req)
       val currentSender = sender
       val reqSiteId     = req.site.id
+      val bidResponseId = setBidResponseId
 
       siteIdMap.get(reqSiteId) match {
         case Some(campaignList) =>
@@ -81,7 +83,7 @@ class BiddingHandler extends Actor with ActorLogging with CampaignCacheT {
                   response match {
                     case Some(res) =>
                       currentSender ! Some(BidResponse(
-                        id           = "randomId123",
+                        id           = bidResponseId,
                         bidRequestId = req.id,
                         price        = res._1.bid,
                         adid         = Some(res._1.id.toString),
@@ -109,7 +111,7 @@ class BiddingHandler extends Actor with ActorLogging with CampaignCacheT {
                       response match {
                         case Some(res) =>
                           currentSender ! Some(BidResponse(
-                            id           = "randomId123",
+                            id           = bidResponseId,
                             bidRequestId = req.id,
                             price        = res._1.bid,
                             adid         = Some(res._1.id.toString),

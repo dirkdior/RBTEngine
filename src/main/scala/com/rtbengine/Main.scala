@@ -15,12 +15,12 @@ object Main extends App {
 
     implicit val system = ActorSystem("RTBEngineAkkaHttpServer")
 
-    val futureBinding   = Http().bindAndHandle(
-      new WebServiceT {
-        override def actorRefFactory: ActorRefFactory = system
-      }.route,
-      "localhost",
-      8080
+    val futureBinding   = Http().newServerAt(
+      interface = "localhost",
+      port      = 8080
+    ).bindFlow( new WebServiceT {
+      override def actorRefFactory: ActorRefFactory = system
+    }.route
     )
 
     futureBinding.onComplete {

@@ -2,6 +2,7 @@ package com.rtbengine.web
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
+import scala.util.{ Failure, Success }
 
 import akka.actor.{ ActorRefFactory, Props }
 import akka.event.Logging
@@ -34,10 +35,15 @@ trait WebServiceT extends WebServiceJsonSupportT {
         logRequestResult("bid:create", Logging.InfoLevel) {
           post {
             entity(as[BidRequest]) { request =>
-              complete {
-                (requestHandler ? request).mapTo[BidResponse] map { response =>
-                  response
+              onComplete((requestHandler ? request).mapTo[Option[BidResponse]]) {
+                case Success(response) => response match {
+                  case Some(res) =>
+                    complete { res }
+                  case None      =>
+                    complete { StatusCodes.NoContent }
                 }
+                case Failure(_)        =>
+                  complete { StatusCodes.InternalServerError }
               }
             }
           }

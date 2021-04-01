@@ -1,9 +1,11 @@
-name := "rtbengine"
+name         := "rtbengine"
 
-version := "0.1"
+version      := "0.1"
 
-lazy val akkaHttpVersion = "10.1.12"
-lazy val akkaVersion     = "2.6.6"
+scalaVersion := "2.13.5"
+
+lazy val akkaHttpVersion = "10.2.4"
+lazy val akkaVersion     = "2.6.13"
 
 libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-http"            % akkaHttpVersion,

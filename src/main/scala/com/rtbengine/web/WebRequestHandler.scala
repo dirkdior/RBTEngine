@@ -2,6 +2,7 @@ package com.rtbengine.web
 
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.language.postfixOps
 import scala.util.{ Failure, Success }
 
 import akka.actor.{ Actor, ActorLogging, Props }
@@ -23,13 +24,13 @@ class WebRequestHandler extends Actor with ActorLogging {
       log.info("processing " + req)
       val currentSender     = sender
 
-      val biddingHandlerFut = (biddingHandler ? req).mapTo[BidResponse]
+      val biddingHandlerFut = (biddingHandler ? req).mapTo[Option[BidResponse]]
 
       biddingHandlerFut onComplete {
         case Success(response) =>
           currentSender ! response
-        case Failure(error)    =>
-          log.error(s"Error from biddingHandler while processing [$req]" + Some(error))
+        case Failure(_)        =>
+          currentSender ! None
       }
   }
 
